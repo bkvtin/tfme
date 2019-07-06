@@ -1,62 +1,69 @@
-# Define our VPC
-resource "aws_vpc" "default" {
-  cidr_block = "${var.vpc_cidr}"
-  enable_dns_hostnames = true
+module "backbone_foo_stash_label" {
+  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=0.9.0"
+  namespace   = "aws"
+  environment = "backbone"
+  stage       = "foo"
+  name        = "stash"
+}
+
+# define our VPC
+resource "aws_vpc" "backbone_foo_stash" {
+  cidr_block           = "${var.vpc_cidr}"
+  enable_dns_hostnames = "${var.vpc_dns["default"]}"
 
   tags {
-    Name = "test-vpc"
+    Name = "${module.backbone_foo_stash_label.id}"
   }
 }
 
+# define the public subnet
+resource "aws_subnet" "backbone_foo_stash_public_subnet" {
+  vpc_id = "${aws_vpc.backbone_foo_stash.id}"
 
-# Define the public subnet
-resource "aws_subnet" "public-subnet" {
-  vpc_id = "${aws_vpc.default.id}"
-  cidr_block = "${var.public_subnet_cidr}"
-  availability_zone = "us-east-1a"
+  cidr_block        = "${var.public_subnet_cidr}"
+  availability_zone = "${var.aws_zone["ue_1a"]}"
 
   tags {
-    Name = "Web Public Subnet"
+    Name = "${module.backbone_foo_stash_label.id}-public"
   }
 }
 
-# Define the private subnet
-resource "aws_subnet" "private-subnet" {
-  vpc_id = "${aws_vpc.default.id}"
-  cidr_block = "${var.private_subnet_cidr}"
-  availability_zone = "us-east-1b"
+# define the private subnet
+resource "aws_subnet" "backbone_foo_stash_private_subnet" {
+  vpc_id            = "${aws_vpc.backbone_foo_stash.id}"
+  cidr_block        = "${var.private_subnet_cidr}"
+  availability_zone = "${var.aws_zone["ue_1b"]}"
 
   tags {
-    Name = "Database Private Subnet"
+    Name = "${module.backbone_foo_stash_label.id}-private"
   }
 }
 
-
-# Define the internet gateway
-resource "aws_internet_gateway" "gw" {
-  vpc_id = "${aws_vpc.default.id}"
+# define the internet gateway
+resource "aws_internet_gateway" "backbone_foo_stash_gateway" {
+  vpc_id = "${aws_vpc.backbone_foo_stash.id}"
 
   tags {
-    Name = "VPC IGW"
+    Name = "${module.backbone_foo_stash_label.id}-gateway"
   }
 }
 
-# Define the route table
-resource "aws_route_table" "web-public-rt" {
-  vpc_id = "${aws_vpc.default.id}"
+# define the route table
+resource "aws_route_table" "backbone_foo_stash_route_table" {
+  vpc_id = "${aws_vpc.backbone_foo_stash.id}"
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.gw.id}"
+    gateway_id = "${aws_internet_gateway.backbone_foo_stash_gateway.id}"
   }
 
   tags {
-    Name = "Public Subnet RT"
+    Name = "${module.backbone_foo_stash_label.id}-route-table"
   }
 }
 
-# Assign the route table to the public Subnet
+# ssign the route table to the public Subnet
 resource "aws_route_table_association" "web-public-rt" {
-  subnet_id = "${aws_subnet.public-subnet.id}"
-  route_table_id = "${aws_route_table.web-public-rt.id}"
+  subnet_id      = "${aws_subnet.backbone_foo_stash_public_subnet.id}"
+  route_table_id = "${aws_route_table.backbone_foo_stash_route_table.id}"
 }
