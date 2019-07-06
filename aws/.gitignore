@@ -1,0 +1,14 @@
+# Compiled files (need backup tfstate files)
+*.tfstate
+*.tfstate.backup
+
+# Module directory
+.terraform/
+
+# custom ~/.aws/credentials
+.aws/
+
+# Pycharm IDE
+.idea/
+# VScode IDE
+.vscode/
