@@ -1,34 +1,53 @@
 variable "bucket_name" {
-  type = "string"
+  type    = "string"
   default = "tfs-kops"
 }
 
 variable "aws_region" {
   description = "Region for the VPC"
-  default = "us-east-1"
+  default     = "us-east-1"
+}
+
+variable "aws_zone" {
+  type = "map"
+
+  default = {
+    "default" = "us-east-1a"
+    "ue_1a"   = "us-east-1a"
+    "ue_1b"   = "us-east-1b"
+  }
 }
 
 variable "vpc_cidr" {
   description = "CIDR for the VPC"
-  default = "10.0.0.0/16"
+  default     = "10.0.0.0/16"
+}
+
+variable "vpc_dns" {
+  type = "map"
+
+  default = {
+    "default" = "true"
+    "false"   = "false"
+  }
 }
 
 variable "public_subnet_cidr" {
   description = "CIDR for the public subnet"
-  default = "10.0.1.0/24"
+  default     = "10.0.1.0/24"
 }
 
 variable "private_subnet_cidr" {
   description = "CIDR for the private subnet"
-  default = "10.0.2.0/24"
+  default     = "10.0.2.0/24"
 }
 
 variable "ami" {
   description = "Amazon Linux AMI"
-  default = "ami-4fffc834"
+  default     = "ami-4fffc834"
 }
 
 variable "key_path" {
   description = "SSH Public Key path"
-  default = "/Users/lap01178/.ssh/id_rsa.pub"
+  default     = "/Users/lap01178/.ssh/id_rsa.pub"
 }
