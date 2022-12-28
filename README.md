@@ -1,0 +1,3 @@
+## note
+
+* using `aws` tintuk
